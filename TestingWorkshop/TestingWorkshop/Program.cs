@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -141,12 +144,14 @@ namespace TestingWorkshop
                 }
             }
 
-            if (correctHours.Count() > 0)
-            {
-                var time = correctHours.Select(h => new TimeSpan(h.hour.fullNo, h.minutes.fullNo, h.seconds.fullNo)).Min();
+            HttpClient client = new HttpClient();
+            var jsonObject = JsonConvert.SerializeObject(correctHours.Select(h => h.ToString()).ToArray());
+            HttpContent content = new StringContent(jsonObject, Encoding.UTF8, "application/json");
+            var response = client.PostAsync("http://localhost:5000/api/values/getmin", content).Result;
 
-                result = time.ToString();
-            }
+            Stream receiveStream = response.Content.ReadAsStreamAsync().Result;
+            StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
+            result = readStream.ReadToEnd();
 
             return result;
         }
