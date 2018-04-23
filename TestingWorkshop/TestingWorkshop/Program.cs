@@ -6,38 +6,22 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using TestingWorkshop.Models;
+using TestingWorkshop.Services;
 
 namespace TestingWorkshop
 {
-    public class doubleDigit
-    {
-        public int first;
-        public int second;
-
-        public int fullNo
-        {
-            get
-            {
-                return int.Parse(string.Format("{0}{1}", first, second));
-            }
-        }
-    }
-
-    public class hour24
-    {
-        public doubleDigit hour;
-        public doubleDigit minutes;
-
-        public doubleDigit seconds;
-
-        public override string ToString()
-        {
-            return new TimeSpan(hour.fullNo, minutes.fullNo, seconds == null ? 0 : seconds.fullNo).ToString();
-        }
-    }
+    
 
     public class Solution
     {
+        private readonly IHoursProcessor _processor;
+
+        public Solution(IHoursProcessor processor)
+        {
+            _processor = processor;
+        }
+
         public string solution(int A, int B, int C, int D, int E, int F)
         {
             var digits = new List<int>();
@@ -52,7 +36,7 @@ namespace TestingWorkshop
 
             string result = "NOT POSSIBLE";
 
-            var hours = new List<hour24>();
+            var hours = new List<Hour24Model>();
 
             for (int first = 0; first < 6; first++)
             {
@@ -63,16 +47,16 @@ namespace TestingWorkshop
 
                 foreach (var secondNo in testDigits)
                 {
-                    var hour = new doubleDigit() { first = firstNo, second = secondNo };
+                    var hour = new TimeNoModel() { first = firstNo, second = secondNo };
 
                     if (validateHour(hour))
                     {
-                        hours.Add(new hour24 { hour = hour });
+                        hours.Add(new Hour24Model { hour = hour });
                     }
                 }
             }
 
-            var hoursWithMinutes = new List<hour24>();
+            var hoursWithMinutes = new List<Hour24Model>();
 
             foreach (var hour in hours)
             {
@@ -90,8 +74,8 @@ namespace TestingWorkshop
                     foreach (var secondNo in digitsForNext)
                     {
 
-                        var minute = new doubleDigit() { first = firstNo, second = secondNo };
-                        var hourcpy = new hour24
+                        var minute = new TimeNoModel() { first = firstNo, second = secondNo };
+                        var hourcpy = new Hour24Model
                         {
                             hour = hour.hour,
                             minutes = hour.minutes,
@@ -106,7 +90,7 @@ namespace TestingWorkshop
                 }
             }
 
-            var correctHours = new List<hour24>();
+            var correctHours = new List<Hour24Model>();
 
             foreach (var hour in hoursWithMinutes)
             {
@@ -126,12 +110,12 @@ namespace TestingWorkshop
                     foreach (var secondNo in digitsForNext)
                     {
 
-                        var seconds = new doubleDigit() { first = firstNo, second = secondNo };
+                        var seconds = new TimeNoModel() { first = firstNo, second = secondNo };
 
                         if (validateMinSec(seconds))
                         {
 
-                            var hourcpy = new hour24
+                            var hourcpy = new Hour24Model
                             {
                                 hour = hour.hour,
                                 minutes = hour.minutes,
@@ -144,24 +128,17 @@ namespace TestingWorkshop
                 }
             }
 
-            HttpClient client = new HttpClient();
-            var jsonObject = JsonConvert.SerializeObject(correctHours.Select(h => h.ToString()).ToArray());
-            HttpContent content = new StringContent(jsonObject, Encoding.UTF8, "application/json");
-            var response = client.PostAsync("http://localhost:5000/api/values/getmin", content).Result;
-
-            Stream receiveStream = response.Content.ReadAsStreamAsync().Result;
-            StreamReader readStream = new StreamReader(receiveStream, Encoding.UTF8);
-            result = readStream.ReadToEnd();
+            result = _processor.Process(correctHours);
 
             return result;
         }
 
-        static bool validateHour(doubleDigit hour)
+        static bool validateHour(TimeNoModel hour)
         {
             return hour.fullNo >= 0 && hour.fullNo <= 24;
         }
 
-        static bool validateMinSec(doubleDigit hour)
+        static bool validateMinSec(TimeNoModel hour)
         {
             return hour.fullNo >= 0 && hour.fullNo <= 60;
         }
@@ -171,7 +148,8 @@ namespace TestingWorkshop
     {
         static void Main(string[] args)
         {
-            var proc = new Solution();
+            var processor = new HourProcessor();
+            var proc = new Solution(processor);
 
             var hour = proc.solution(1, 8, 3, 2, 6, 4);
 

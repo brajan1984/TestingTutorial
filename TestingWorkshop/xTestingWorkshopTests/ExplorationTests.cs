@@ -2,13 +2,20 @@
 using System;
 using System.Linq;
 using TestingWorkshop;
+using TestingWorkshop.Services;
 using Xunit;
 
 namespace xTestingWorkshopTests
 {
     public class ExplorationTests
     {
-        Solution _solutionImpl = new Solution();
+        Solution _solutionImpl = null;
+
+        public ExplorationTests()
+        {
+            var processor = new HourProcessor();
+            _solutionImpl = new Solution(processor);
+        }
 
         [Theory]
         [InlineData(1, 8, 3, 2, 6, 4, "12:36:48")]
