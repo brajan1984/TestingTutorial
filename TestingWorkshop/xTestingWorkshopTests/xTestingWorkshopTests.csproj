@@ -72,7 +72,10 @@
     <Otherwise />
   </Choose>
   <ItemGroup>
+    <Compile Include="Comparer\TimeNoModelComparer.cs" />
     <Compile Include="ExplorationTests.cs" />
+    <Compile Include="Models\Hour24ModelTests.cs" />
+    <Compile Include="Models\TimeNoModelTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

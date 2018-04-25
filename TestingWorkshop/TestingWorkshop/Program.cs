@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using TestingWorkshop.Extensions;
 using TestingWorkshop.Models;
 using TestingWorkshop.Services;
 
@@ -22,16 +23,8 @@ namespace TestingWorkshop
             _processor = processor;
         }
 
-        public string solution(int A, int B, int C, int D, int E, int F)
+        public List<Hour24Model> GetAllPossibleHours(List<int> digits)
         {
-            var digits = new List<int>();
-            digits.Add(A);
-            digits.Add(B);
-            digits.Add(C);
-            digits.Add(D);
-            digits.Add(E);
-            digits.Add(F);
-
             var correctHour = new List<int>();
 
             string result = "NOT POSSIBLE";
@@ -128,7 +121,31 @@ namespace TestingWorkshop
                 }
             }
 
-            result = _processor.Process(correctHours);
+            return correctHours;
+        }
+
+        private void PrintHours(List<Hour24Model> correctHours)
+        {
+            var combinations = "new string[] {" + correctHours.Select(h => h.To24HourFormatString()).Aggregate((c, n) => $"{c}, \"{n}\"") + "}";
+            
+            Console.Write(combinations);
+        }
+
+        public string solution(int A, int B, int C, int D, int E, int F)
+        {
+            var digits = new List<int>();
+            digits.Add(A);
+            digits.Add(B);
+            digits.Add(C);
+            digits.Add(D);
+            digits.Add(E);
+            digits.Add(F);
+
+            List<Hour24Model> correctHours = GetAllPossibleHours(digits);
+
+            PrintHours(correctHours);
+
+            string result = "";// _processor.Process(correctHours);
 
             return result;
         }
