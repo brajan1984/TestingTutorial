@@ -126,7 +126,7 @@ namespace TestingWorkshop
 
         private void PrintHours(List<Hour24Model> correctHours)
         {
-            var combinations = "new string[] {" + correctHours.Select(h => h.To24HourFormatString()).Aggregate((c, n) => $"{c}, \"{n}\"") + "}";
+            var combinations = "new string[] {" + correctHours.Select(h => "\"" + h.To24HourFormatString() + "\"").Aggregate((c, n) => $"{c}, {n}") + "}";
             
             Console.Write(combinations);
         }
@@ -169,6 +169,7 @@ namespace TestingWorkshop
             var proc = new Solution(processor);
 
             var hour = proc.solution(1, 8, 3, 2, 6, 4);
+            
 
             Console.WriteLine(hour);
 
