@@ -23,6 +23,118 @@ namespace TestingWorkshop
             _processor = processor;
         }
 
+        private IEnumerable<TimeNoModel> GetAllHours(List<int> digits)
+        {
+            var allHours = new List<TimeNoModel>();
+
+            for (int first = 0; first < 6; first++)
+            {
+                var testDigits = digits.ToList();
+
+                int firstNo = testDigits[first];
+                testDigits.Remove(firstNo);
+
+                foreach (var secondNo in testDigits)
+                {
+                    var hour = new TimeNoModel() { first = firstNo, second = secondNo };
+
+                    if (validateHour(hour))
+                    {
+                        allHours.Add(hour);
+                    }
+                }
+            }
+
+            return allHours;
+        }
+
+        private Dictionary<List<TimeNoModel>, List<TimeNoModel>> GetUniqueCombinations(List<int> allDigits, List<List<TimeNoModel>> allCurrentCombinations)
+        {
+            var result = new Dictionary<List<TimeNoModel>, List<TimeNoModel>>();
+            
+            foreach (var usedCombination in allCurrentCombinations)
+            {
+                var possibleDigits = allDigits.ToList();
+
+                foreach (var numberInCombination in usedCombination)
+                {
+                    possibleDigits.Remove(numberInCombination.first);
+                    possibleDigits.Remove(numberInCombination.second);
+
+                    var combinations = GenerateNumbers(possibleDigits);
+                }
+            }
+
+            return result;
+        }
+
+        public List<TimeNoModel> GenerateNumbers(List<int> digits)
+        {
+            if (digits.Count <= 1)
+            {
+                throw new ArgumentException("There should be two or more digits");
+            }
+
+            var result = new List<TimeNoModel>();
+
+            var testDigits = digits.ToList();
+
+            foreach (var firstDigit in testDigits)
+            {
+                var digitsForNext = testDigits.ToList();
+
+                int firstNo = firstDigit;
+                digitsForNext.Remove(firstNo);
+
+                foreach (var secondNo in digitsForNext)
+                {
+                    var seconds = new TimeNoModel() { first = firstNo, second = secondNo };
+                    result.Add(seconds);
+                }
+            }
+
+            return result;
+        }
+
+        /*private void GenerateHourPartials(List<int> digits, List<List<TimeNoModel>> allExcludedCombinations, Func<TimeNoModel, bool> validator)
+        {
+            foreach (var combination in allExcludedCombinations)
+            {
+                var testDigits = digits.ToList();
+                testDigits.Remove(hour.hour.first);
+                testDigits.Remove(hour.hour.second);
+                testDigits.Remove(hour.minutes.first);
+                testDigits.Remove(hour.minutes.second);
+
+                for (int first = 0; first < testDigits.Count(); first++)
+                {
+                    var digitsForNext = testDigits.ToList();
+
+                    int firstNo = digitsForNext[first];
+                    digitsForNext.Remove(firstNo);
+
+                    foreach (var secondNo in digitsForNext)
+                    {
+
+                        var seconds = new TimeNoModel() { first = firstNo, second = secondNo };
+
+                        if (validateMinSec(seconds))
+                        {
+
+                            var hourcpy = new Hour24Model
+                            {
+                                hour = hour.hour,
+                                minutes = hour.minutes,
+                                seconds = hour.seconds
+                            };
+                            hourcpy.seconds = seconds;
+                            correctHours.Add(hourcpy);
+                        }
+                    }
+                }
+            }
+        }*/
+
         public List<Hour24Model> GetAllPossibleHours(List<int> digits)
         {
             var correctHour = new List<int>();
@@ -145,7 +257,7 @@ namespace TestingWorkshop
 
             PrintHours(correctHours);
 
-            string result = "";// _processor.Process(correctHours);
+            string result = _processor.Process(correctHours);
 
             return result;
         }

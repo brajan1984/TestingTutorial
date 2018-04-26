@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,15 +13,13 @@ namespace xTestingWorkshopTests
 {
     public class ExplorationTests
     {
+        Mock<IHoursProcessor> _processorMock = new Mock<IHoursProcessor>();
         Solution _solutionImpl = null;
         static readonly string[] _testSet1 = new string[] { "18:32:46", "18:36:24", "18:36:42", "18:34:26", "18:23:46", "18:26:34", "18:26:43", "18:24:36", "18:43:26", "18:42:36", "18:46:32", "18:46:23", "13:28:46", "13:26:48", "13:48:26", "13:46:28", "12:38:46", "12:36:48", "12:48:36", "12:46:38", "16:38:24", "16:38:42", "16:32:48", "16:34:28", "16:28:34", "16:28:43", "16:23:48", "16:24:38", "16:48:32", "16:48:23", "16:43:28", "16:42:38", "14:38:26", "14:36:28", "14:28:36", "14:26:38", "21:38:46", "21:36:48", "21:48:36", "21:46:38", "23:18:46", "23:16:48", "23:48:16", "23:46:18", "24:18:36", "24:16:38", "24:38:16", "24:36:18" };
 
         public ExplorationTests()
         {
-            var processor = new HourProcessor();
-            _solutionImpl = new Solution(processor);
-
-            //_testSet1 = new string[] { "18:32:46", "18:36:24", "18:36:42", "18:34:26", "18:23:46", "18:26:34", "18:26:43", "18:24:36", "18:43:26", "18:42:36", "18:46:32", "18:46:23", "13:28:46", "13:26:48", "13:48:26", "13:46:28", "12:38:46", "12:36:48", "12:48:36", "12:46:38", "16:38:24", "16:38:42", "16:32:48", "16:34:28", "16:28:34", "16:28:43", "16:23:48", "16:24:38", "16:48:32", "16:48:23", "16:43:28", "16:42:38", "14:38:26", "14:36:28", "14:28:36", "14:26:38", "21:38:46", "21:36:48", "21:48:36", "21:46:38", "23:18:46", "23:16:48", "23:48:16", "23:46:18", "24:18:36", "24:16:38", "24:38:16", "24:36:18" };
+            _solutionImpl = new Solution(_processorMock.Object);
         }
 
         [Theory]
@@ -54,6 +53,34 @@ namespace xTestingWorkshopTests
                 .BeEquivalentTo(allCombinations.ToList());
         }
 
-        
+        [Theory]
+        [InlineData(new int[] { 1, 2 }, new int[] { 12, 21 })]
+        [InlineData(new int[] { 4, 4 }, new int[] { 44, 44 })]
+        [InlineData(new int[] { 5, 6, 7 }, new int[] { 56, 57, 65, 67, 75, 76 })]
+        [InlineData(new int[] { 1, 8, 3, 2, 6, 4 }, new int[] { 18, 13, 12, 16, 14, 81, 83, 82, 86, 84, 31, 38, 32, 36, 34, 21, 28, 23, 26, 24, 61, 68, 63, 62, 64, 41, 48, 43, 42, 46 })]
+        public void GenerateNumbers_GiveSomePossibleDigits_CorrectCombinationsReturned(int[] digits, int[] combinationsReturned)
+        {
+            var combinationsGenerated = _solutionImpl.GenerateNumbers(digits.ToList());
+
+            var testResult = combinationsGenerated.Select(v => v.fullNo).ToList();
+
+            testResult
+                .Should()
+                .BeEquivalentTo(combinationsReturned.ToList());
+        }
+
+        [Theory]
+        [InlineData(new int[] { })]
+        [InlineData(new int[] { 1 })]
+        public void GenerateNumbers_GiveDigit_ShouldThrowException(int[] digits)
+        {
+            Action testAction = () => _solutionImpl.GenerateNumbers(digits.ToList());
+
+            testAction
+                .Should()
+                .Throw<ArgumentException>()
+                .WithMessage("There should be two or more digits");
+        }
+
     }
 }
