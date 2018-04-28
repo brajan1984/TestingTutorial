@@ -23,29 +23,9 @@ namespace TestingWorkshop
             _processor = processor;
         }
 
-        private IEnumerable<TimeNoModel> GetAllHours(List<int> digits)
+        public IEnumerable<TimeNoModel> GetAllHours(List<int> digits)
         {
-            var allHours = new List<TimeNoModel>();
-
-            for (int first = 0; first < 6; first++)
-            {
-                var testDigits = digits.ToList();
-
-                int firstNo = testDigits[first];
-                testDigits.Remove(firstNo);
-
-                foreach (var secondNo in testDigits)
-                {
-                    var hour = new TimeNoModel() { first = firstNo, second = secondNo };
-
-                    if (validateHour(hour))
-                    {
-                        allHours.Add(hour);
-                    }
-                }
-            }
-
-            return allHours;
+            return GenerateNumbers(digits).Where(h => validateHour(h));
         }
 
         private Dictionary<List<TimeNoModel>, List<TimeNoModel>> GetUniqueCombinations(List<int> allDigits, List<List<TimeNoModel>> allCurrentCombinations)
@@ -139,27 +119,7 @@ namespace TestingWorkshop
         {
             var correctHour = new List<int>();
 
-            string result = "NOT POSSIBLE";
-
-            var hours = new List<Hour24Model>();
-
-            for (int first = 0; first < 6; first++)
-            {
-                var testDigits = digits.ToList();
-
-                int firstNo = testDigits[first];
-                testDigits.Remove(firstNo);
-
-                foreach (var secondNo in testDigits)
-                {
-                    var hour = new TimeNoModel() { first = firstNo, second = secondNo };
-
-                    if (validateHour(hour))
-                    {
-                        hours.Add(new Hour24Model { hour = hour });
-                    }
-                }
-            }
+            var hours = GetAllHours(digits).Select(gh => new Hour24Model { hour = gh });
 
             var hoursWithMinutes = new List<Hour24Model>();
 
@@ -249,10 +209,11 @@ namespace TestingWorkshop
             List<Hour24Model> correctHours = GetAllPossibleHours(digits);
 
             var printResult = correctHours.ParseHoursCollection();
-
             Console.WriteLine(printResult);
 
-            string result = _processor.Process(correctHours);
+            string result = "NOT POSSIBLE";
+
+            result = _processor.Process(correctHours);
 
             return result;
         }

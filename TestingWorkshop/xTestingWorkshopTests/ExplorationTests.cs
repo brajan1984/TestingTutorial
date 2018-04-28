@@ -81,5 +81,23 @@ namespace xTestingWorkshopTests
                 .Throw<ArgumentException>()
                 .WithMessage("There should be two or more digits");
         }
+
+        [Theory]
+        [InlineData(new int[] { 1, 8, 3, 2, 6, 4 }, new int[] { 1, 8, 1, 3, 1, 2, 1, 6, 1, 4, 2, 1, 2, 3 })]
+        public void GetAllHours_HoursAreFilteredByProperRange_CorrectHoursCollection(int[] inputData, int[] expectedResultData)
+        {
+            var hours = _solutionImpl.GetAllHours(inputData.ToList());
+
+            var expectedResult = new List<TimeNoModel>();
+
+            for (int i = 0; i < expectedResultData.Length; i=i+2)
+            {
+                expectedResult.Add(new TimeNoModel { first = expectedResultData[i], second = expectedResultData[i + 1] });
+            }
+
+            var testResult = _solutionImpl.GetAllHours(inputData.ToList());
+
+            testResult.Should().BeEquivalentTo(testResult);
+        }
     }
 }
