@@ -81,6 +81,5 @@ namespace xTestingWorkshopTests
                 .Throw<ArgumentException>()
                 .WithMessage("There should be two or more digits");
         }
-
     }
 }

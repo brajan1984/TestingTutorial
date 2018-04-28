@@ -47,7 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Extensions\Extensions.cs" />
+    <Compile Include="Extensions\Hour24ModelExtensions.cs" />
+    <Compile Include="Extensions\TimeNoModelExtensions.cs" />
     <Compile Include="Models\Hour24Model.cs" />
     <Compile Include="Models\TimeNoModel.cs" />
     <Compile Include="Program.cs" />

@@ -236,13 +236,6 @@ namespace TestingWorkshop
             return correctHours;
         }
 
-        private void PrintHours(List<Hour24Model> correctHours)
-        {
-            var combinations = "new string[] {" + correctHours.Select(h => "\"" + h.To24HourFormatString() + "\"").Aggregate((c, n) => $"{c}, {n}") + "}";
-            
-            Console.Write(combinations);
-        }
-
         public string solution(int A, int B, int C, int D, int E, int F)
         {
             var digits = new List<int>();
@@ -255,7 +248,9 @@ namespace TestingWorkshop
 
             List<Hour24Model> correctHours = GetAllPossibleHours(digits);
 
-            PrintHours(correctHours);
+            var printResult = correctHours.ParseHoursCollection();
+
+            Console.WriteLine(printResult);
 
             string result = _processor.Process(correctHours);
 
