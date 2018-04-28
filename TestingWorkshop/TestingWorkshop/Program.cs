@@ -17,71 +17,25 @@ namespace TestingWorkshop
     public class Solution
     {
         private readonly IHoursProcessor _processor;
+        private readonly IUniqueNumberGenerator _generator;
 
-        public Solution(IHoursProcessor processor)
+        public Solution(IHoursProcessor processor, IUniqueNumberGenerator generator)
         {
             _processor = processor;
+            _generator = generator;
         }
 
         public IEnumerable<TimeNoModel> GetAllHours(List<int> digits)
         {
-            return GenerateNumbers(digits).Where(h => validateHour(h)).ToList();
-        }
+            return _generator.GenerateUniqueNumbers(digits)
+                .Select(n => {
+                    int firstDigit = n / 10;
+                    int secondDigit = n - firstDigit * 10;
 
-        public List<TimeNoModel> GetUniqueCombinations(List<int> allDigits, List<TimeNoModel> allCurrentCombinations)
-        {
-            var excludedDigits = new List<int>();
-
-            foreach (var usedCombination in allCurrentCombinations)
-            {
-                excludedDigits.Add(usedCombination.first);
-                excludedDigits.Add(usedCombination.second);
-            }
-
-            var combinations = GenerateNumbersExcept(allDigits, excludedDigits);
-
-            return combinations;
-        }
-
-        public List<TimeNoModel> GenerateNumbersExcept(IEnumerable<int> digits, IEnumerable<int> except)
-        {
-            var digitsFiltered = digits.ToList();
-
-            except.ToList().ForEach(toRemove =>
-            {
-                digitsFiltered = digitsFiltered.GroupBy(s => s)
-                    .SelectMany(g => g.Key.Equals(toRemove) ? g.Skip(1) : g).ToList();
-            });
-
-            return GenerateNumbers(digitsFiltered);
-        }
-
-        public List<TimeNoModel> GenerateNumbers(IEnumerable<int> digits)
-        {
-            if (digits.Count() <= 1)
-            {
-                throw new ArgumentException("There should be two or more digits");
-            }
-
-            var result = new List<TimeNoModel>();
-
-            var testDigits = digits.ToList();
-
-            foreach (var firstDigit in testDigits)
-            {
-                var digitsForNext = testDigits.ToList();
-
-                int firstNo = firstDigit;
-                digitsForNext.Remove(firstNo);
-
-                foreach (var secondNo in digitsForNext)
-                {
-                    var seconds = new TimeNoModel() { first = firstNo, second = secondNo };
-                    result.Add(seconds);
-                }
-            }
-
-            return result;
+                    return new TimeNoModel { first = firstDigit, second = secondDigit };
+                })
+                .Where(h => validateHour(h))
+                .ToList();
         }
 
         public List<Hour24Model> GetAllPossibleHours(List<int> digits)
@@ -94,7 +48,13 @@ namespace TestingWorkshop
 
             foreach (var hour in hours)
             {
-                var allPossibleMinutes = GetUniqueCombinations(digits, new List<TimeNoModel> { hour.hour })
+                var allPossibleMinutes = _generator.GenerateUniqueNumbersExcluding(digits, new List<int> { hour.hour.first, hour.hour.second })
+                    .Select(n => {
+                        int firstDigit = n / 10;
+                        int secondDigit = n - firstDigit * 10;
+
+                        return new TimeNoModel { first = firstDigit, second = secondDigit };
+                    })
                     .Where(v => validateMinSec(v))
                     .ToList();
 
@@ -110,7 +70,13 @@ namespace TestingWorkshop
 
             foreach (var hour in allHours)
             {
-                var allPossibleMinutes = GetUniqueCombinations(digits, new List<TimeNoModel> { hour.hour, hour.minutes })
+                var allPossibleMinutes = _generator.GenerateUniqueNumbersExcluding(digits, new List<int> { hour.hour.first, hour.hour.second, hour.minutes.first, hour.minutes.second, })
+                    .Select(n => {
+                        int firstDigit = n / 10;
+                        int secondDigit = n - firstDigit * 10;
+
+                        return new TimeNoModel { first = firstDigit, second = secondDigit };
+                    })
                     .Where(v => validateMinSec(v))
                     .ToList();
 
@@ -163,7 +129,8 @@ namespace TestingWorkshop
         static void Main(string[] args)
         {
             var processor = new HourProcessor();
-            var proc = new Solution(processor);
+            var generator = new TwoDigitsUniqueNumberGenerator();
+            var proc = new Solution(processor, generator);
 
             var hour = proc.solution(1, 8, 3, 2, 6, 4);
             

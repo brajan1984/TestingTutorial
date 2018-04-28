@@ -55,6 +55,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\HourProcessor.cs" />
     <Compile Include="Services\IHoursProcessor.cs" />
+    <Compile Include="Services\IUniqueNumberGenerator.cs" />
+    <Compile Include="Services\TwoDigitsUniqueNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
