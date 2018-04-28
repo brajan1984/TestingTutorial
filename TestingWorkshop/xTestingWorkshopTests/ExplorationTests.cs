@@ -14,14 +14,14 @@ namespace xTestingWorkshopTests
     public class ExplorationTests
     {
         Mock<IHoursProcessor> _processorMock = new Mock<IHoursProcessor>();
-        Mock<IUniqueNumberGenerator> _numberGeneratorMock = new Mock<IUniqueNumberGenerator>();
+        Mock<IHourGenerator> _hourGenerator = new Mock<IHourGenerator>();
 
         Solution _solutionImpl = null;
         static readonly string[] _testSet1 = new string[] { "18:32:46", "18:36:24", "18:36:42", "18:34:26", "18:23:46", "18:26:34", "18:26:43", "18:24:36", "18:43:26", "18:42:36", "18:46:32", "18:46:23", "13:28:46", "13:26:48", "13:48:26", "13:46:28", "12:38:46", "12:36:48", "12:48:36", "12:46:38", "16:38:24", "16:38:42", "16:32:48", "16:34:28", "16:28:34", "16:28:43", "16:23:48", "16:24:38", "16:48:32", "16:48:23", "16:43:28", "16:42:38", "14:38:26", "14:36:28", "14:28:36", "14:26:38", "21:38:46", "21:36:48", "21:48:36", "21:46:38", "23:18:46", "23:16:48", "23:48:16", "23:46:18", "24:18:36", "24:16:38", "24:38:16", "24:36:18" };
 
         public ExplorationTests()
         {
-            _solutionImpl = new Solution(_processorMock.Object, _numberGeneratorMock.Object);
+            _solutionImpl = new Solution(_processorMock.Object, _hourGenerator.Object);
         }
 
         [Theory]
@@ -38,7 +38,7 @@ namespace xTestingWorkshopTests
             result.Should().Be(expectedValue);
         }
 
-        [Theory]
+        /*[Theory]
         [InlineData(new int[] { 1, 8, 3, 2, 6, 4 }, new string[] { "18:34:26", "18:23:46", "18:32:46", "18:36:24", "18:36:42", "18:26:34", "18:26:43", "18:24:36", "18:43:26", "18:42:36", "18:46:32", "18:46:23", "13:28:46", "13:26:48", "13:48:26", "13:46:28", "12:38:46", "12:36:48", "12:48:36", "12:46:38", "16:38:24", "16:38:42", "16:32:48", "16:34:28", "16:28:34", "16:28:43", "16:23:48", "16:24:38", "16:48:32", "16:48:23", "16:43:28", "16:42:38", "14:38:26", "14:36:28", "14:28:36", "14:26:38", "21:38:46", "21:36:48", "21:48:36", "21:46:38", "23:18:46", "23:16:48", "23:48:16", "23:46:18", "24:18:36", "24:16:38", "24:38:16", "24:36:18" })]
         [InlineData(new int[] { 2, 6, 4, 1, 8, 3 }, new string[] { "18:34:26", "18:23:46", "18:32:46", "18:36:24", "18:36:42", "18:26:34", "18:26:43", "18:24:36", "18:43:26", "18:42:36", "18:46:32", "18:46:23", "13:28:46", "13:26:48", "13:48:26", "13:46:28", "12:38:46", "12:36:48", "12:48:36", "12:46:38", "16:38:24", "16:38:42", "16:32:48", "16:34:28", "16:28:34", "16:28:43", "16:23:48", "16:24:38", "16:48:32", "16:48:23", "16:43:28", "16:42:38", "14:38:26", "14:36:28", "14:28:36", "14:26:38", "21:38:46", "21:36:48", "21:48:36", "21:46:38", "23:18:46", "23:16:48", "23:48:16", "23:46:18", "24:18:36", "24:16:38", "24:38:16", "24:36:18" })]
         [InlineData(new int[] { 1, 9, 3, 5, 6, 8 }, new string[] { "19:36:58", "19:38:56", "19:56:38", "19:58:36", "16:39:58", "16:38:59", "16:59:38", "16:58:39", "18:39:56", "18:36:59", "18:59:36", "18:56:39" })]
@@ -55,61 +55,6 @@ namespace xTestingWorkshopTests
             result.Select(h => h.To24HourFormatString())
                 .Should()
                 .BeEquivalentTo(allCombinations.ToList());
-        }
-
-        [Theory]
-        [InlineData(new int[] { 1, 8, 3, 2 }, 18, new int[] { 1, 8 }, new int[] { 32, 23 }, new int[] { 32, 23 })]
-        [InlineData(new int[] { 1, 8, 9, 2 }, 18, new int[] { 1, 8 }, new int[] { 92, 29 }, new int[] { 29 })]
-        [InlineData(new int[] { 1, 8, 9, 9 }, 18, new int[] { 1, 8 }, new int[] { 99, 99 }, new int[] { })]
-        public void FillAllHourPartials_GetsAStandardSetAndFillMinutes_ReturnsHoursWithMinutes(int[] digits, int hour, int[] hourDigits, int[] allPossibleMinutes, int[] expectedResult)
-        {
-            var hourModel = new List<Hour24Model> { new Hour24Model { hour = GenerateTimeNoModel(hour) } };
-            var expectedHourWithMinutes = expectedResult.Select(m => new Hour24Model { hour = GenerateTimeNoModel(hour), minutes = GenerateTimeNoModel(m) });
-
-            _numberGeneratorMock
-                .Setup(m => m.GenerateUniqueNumbersExcluding(digits, hourDigits))
-                .Returns(allPossibleMinutes.ToList());
-
-            var result = _solutionImpl.FillAllHourPartials(digits, hourModel, (m, v) => m.minutes = v);
-
-            result
-                .Should()
-                .BeEquivalentTo(expectedHourWithMinutes);
-        }
-
-        [Theory]
-        [InlineData(new int[] { 1, 8, 3, 2, 6, 4 }, new int[] { 18, 13, 12, 16, 14, 21, 23, 24, 81, 83, 82, 86, 84, 31 }, new int[] { 18, 13, 12, 16, 14, 21, 23, 24 })]
-        public void FillAllHours_HoursAreFilteredByProperRange_CorrectHoursCollection(int[] inputData, int[] allCombinations, int[] expectedResultData)
-        {
-            var allCombinationsCollection = allCombinations.ToList();
-            var inputDataCollection = inputData.ToList();
-
-            _numberGeneratorMock
-                .Setup(g => g.GenerateUniqueNumbers(inputDataCollection))
-                .Returns(allCombinationsCollection);
-
-            var hours = _solutionImpl.FillAllHours(inputDataCollection);
-
-            var expectedResult = new List<TimeNoModel>();
-
-            for (int i = 0; i < expectedResultData.Length; i++)
-            {
-                var first = expectedResultData[i] / 10;
-                expectedResult.Add(new TimeNoModel { first = first, second = expectedResultData[i] - first * 10 });
-            }
-
-            var testResult = _solutionImpl.FillAllHours(inputData.ToList());
-
-            testResult.Should().BeEquivalentTo(expectedResult);
-
-            _numberGeneratorMock.Verify(m => m.GenerateUniqueNumbers(It.Is<List<int>>(p => p == inputDataCollection)), Times.Once);
-        }
-
-        private TimeNoModel GenerateTimeNoModel(int no)
-        {
-            var first = no / 10;
-            return new TimeNoModel { first = first, second = no - first * 10 };
-        }
-
+        }*/
     }
 }

@@ -17,89 +17,14 @@ namespace TestingWorkshop
     public class Solution
     {
         private readonly IHoursProcessor _processor;
-        private readonly IUniqueNumberGenerator _generator;
+        private readonly IHourGenerator _generator;
 
-        public Solution(IHoursProcessor processor, IUniqueNumberGenerator generator)
+        public Solution(IHoursProcessor processor, IHourGenerator generator)
         {
             _processor = processor;
             _generator = generator;
         }
-
-        public IEnumerable<TimeNoModel> FillAllHours(List<int> digits)
-        {
-            return _generator.GenerateUniqueNumbers(digits)
-                .Select(n => {
-                    int firstDigit = n / 10;
-                    int secondDigit = n - firstDigit * 10;
-
-                    return new TimeNoModel { first = firstDigit, second = secondDigit };
-                })
-                .Where(h => validateHour(h))
-                .ToList();
-        }
-
-        public IEnumerable<Hour24Model> FillAllHourPartials(IEnumerable<int> digits, IEnumerable<Hour24Model> modelsWithHour, Action<Hour24Model, TimeNoModel> modelModificator)
-        {
-            var allFilledModels = new List<Hour24Model>();
-
-            foreach (var hour in modelsWithHour)
-            {
-                var allPossibleValues = _generator.GenerateUniqueNumbersExcluding(digits, ExplodeHourModel(hour))
-                    .Select(n => {
-                        int firstDigit = n / 10;
-                        int secondDigit = n - firstDigit * 10;
-
-                        return new TimeNoModel { first = firstDigit, second = secondDigit };
-                    })
-                    .Where(v => validateMinSec(v))
-                    .ToList();
-
-                allPossibleValues.ForEach(model =>
-                {
-                    var copy = hour.Copy();
-                    modelModificator(copy, model);
-                    allFilledModels.Add(copy);
-                });
-            }
-
-            return allFilledModels;
-        }
-
-        private List<int> ExplodeHourModel(Hour24Model model)
-        {
-            List<int> exploded = new List<int>();
-
-            if(model.hour != null)
-            { 
-                exploded.AddRange(new int[] { model.hour.first, model.hour.second });
-            }
-
-            if (model.minutes != null)
-            {
-                exploded.AddRange(new int[] { model.minutes.first, model.minutes.second });
-            }
-
-            if (model.seconds != null)
-            {
-                exploded.AddRange(new int[] { model.seconds.first, model.seconds.second });
-            }
-
-            return exploded;
-        }
-
-        public List<Hour24Model> GetAllPossibleHours(List<int> digits)
-        {
-            var correctHour = new List<int>();
-
-            var hours = FillAllHours(digits).Select(gh => new Hour24Model { hour = gh });
-
-            var allHours = FillAllHourPartials(digits, hours, (m, v) => m.minutes = v);
-
-            var fullHours = FillAllHourPartials(digits, allHours, (m, v) => m.seconds = v);
-
-            return fullHours.ToList();
-        }
-
+        
         public string solution(int A, int B, int C, int D, int E, int F)
         {
             var digits = new List<int>();
@@ -122,14 +47,18 @@ namespace TestingWorkshop
             return result;
         }
 
-        static bool validateHour(TimeNoModel hour)
-        {
-            return hour.fullNo >= 0 && hour.fullNo <= 24;
-        }
 
-        static bool validateMinSec(TimeNoModel hour)
+        public List<Hour24Model> GetAllPossibleHours(List<int> digits)
         {
-            return hour.fullNo >= 0 && hour.fullNo <= 60;
+            var correctHour = new List<int>();
+
+            var hours = _generator.FillAllHours(digits).Select(gh => new Hour24Model { hour = gh });
+
+            var allHours = _generator.FillAllHourPartials(digits, hours, (m, v) => m.minutes = v);
+
+            var fullHours = _generator.FillAllHourPartials(digits, allHours, (m, v) => m.seconds = v);
+
+            return fullHours.ToList();
         }
     }
 
@@ -139,7 +68,9 @@ namespace TestingWorkshop
         {
             var processor = new HourProcessor();
             var generator = new TwoDigitsUniqueNumberGenerator();
-            var proc = new Solution(processor, generator);
+            var hourGenerator = new HourGenerator(generator);
+
+            var proc = new Solution(processor, hourGenerator);
 
             var hour = proc.solution(1, 8, 3, 2, 6, 4);
             
