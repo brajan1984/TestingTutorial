@@ -73,12 +73,11 @@ namespace xTestingWorkshopTests
 
             var hours = _hourGeneratorImpl.FillAllHours(inputDataCollection);
 
-            var expectedResult = new List<TimeNoModel>();
+            var expectedResult = new List<Hour24Model>();
 
             for (int i = 0; i < expectedResultData.Length; i++)
             {
-                var first = expectedResultData[i] / 10;
-                expectedResult.Add(new TimeNoModel { first = first, second = expectedResultData[i] - first * 10 });
+                expectedResult.Add(new Hour24Model { hour = GenerateTimeNoModel(expectedResultData[i]) });
             }
 
             var testResult = _hourGeneratorImpl.FillAllHours(inputData.ToList());

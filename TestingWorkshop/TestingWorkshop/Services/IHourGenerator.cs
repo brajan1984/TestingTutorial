@@ -9,7 +9,7 @@ namespace TestingWorkshop.Services
 {
     public interface IHourGenerator
     {
-        IEnumerable<TimeNoModel> FillAllHours(List<int> digits);
+        IEnumerable<Hour24Model> FillAllHours(List<int> digits);
         IEnumerable<Hour24Model> FillAllHourPartials(IEnumerable<int> digits, IEnumerable<Hour24Model> modelsWithHour, Action<Hour24Model, TimeNoModel> modelModificator);
     }
 }

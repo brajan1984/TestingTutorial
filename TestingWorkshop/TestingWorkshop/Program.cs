@@ -52,7 +52,7 @@ namespace TestingWorkshop
         {
             var correctHour = new List<int>();
 
-            var hours = _generator.FillAllHours(digits).Select(gh => new Hour24Model { hour = gh });
+            var hours = _generator.FillAllHours(digits);
 
             var allHours = _generator.FillAllHourPartials(digits, hours, (m, v) => m.minutes = v);
 

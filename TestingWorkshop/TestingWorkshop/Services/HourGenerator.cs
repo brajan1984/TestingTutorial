@@ -17,7 +17,7 @@ namespace TestingWorkshop.Services
             _generator = generator;
         }
 
-        public IEnumerable<TimeNoModel> FillAllHours(List<int> digits)
+        public IEnumerable<Hour24Model> FillAllHours(List<int> digits)
         {
             return _generator.GenerateUniqueNumbers(digits)
                 .Select(n => {
@@ -27,6 +27,7 @@ namespace TestingWorkshop.Services
                     return new TimeNoModel { first = firstDigit, second = secondDigit };
                 })
                 .Where(h => validateHour(h))
+                .Select(gh => new Hour24Model { hour = gh })
                 .ToList();
         }
 
