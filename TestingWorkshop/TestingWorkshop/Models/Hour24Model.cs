@@ -10,7 +10,6 @@ namespace TestingWorkshop.Models
     {
         public TimeNoModel hour;
         public TimeNoModel minutes;
-
         public TimeNoModel seconds;
 
         public override string ToString()

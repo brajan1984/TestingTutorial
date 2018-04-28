@@ -25,7 +25,7 @@ namespace TestingWorkshop
             _generator = generator;
         }
 
-        public IEnumerable<TimeNoModel> GetAllHours(List<int> digits)
+        public IEnumerable<TimeNoModel> FillAllHours(List<int> digits)
         {
             return _generator.GenerateUniqueNumbers(digits)
                 .Select(n => {
@@ -38,57 +38,66 @@ namespace TestingWorkshop
                 .ToList();
         }
 
+        public IEnumerable<Hour24Model> FillAllHourPartials(IEnumerable<int> digits, IEnumerable<Hour24Model> modelsWithHour, Action<Hour24Model, TimeNoModel> modelModificator)
+        {
+            var allFilledModels = new List<Hour24Model>();
+
+            foreach (var hour in modelsWithHour)
+            {
+                var allPossibleValues = _generator.GenerateUniqueNumbersExcluding(digits, ExplodeHourModel(hour))
+                    .Select(n => {
+                        int firstDigit = n / 10;
+                        int secondDigit = n - firstDigit * 10;
+
+                        return new TimeNoModel { first = firstDigit, second = secondDigit };
+                    })
+                    .Where(v => validateMinSec(v))
+                    .ToList();
+
+                allPossibleValues.ForEach(model =>
+                {
+                    var copy = hour.Copy();
+                    modelModificator(copy, model);
+                    allFilledModels.Add(copy);
+                });
+            }
+
+            return allFilledModels;
+        }
+
+        private List<int> ExplodeHourModel(Hour24Model model)
+        {
+            List<int> exploded = new List<int>();
+
+            if(model.hour != null)
+            { 
+                exploded.AddRange(new int[] { model.hour.first, model.hour.second });
+            }
+
+            if (model.minutes != null)
+            {
+                exploded.AddRange(new int[] { model.minutes.first, model.minutes.second });
+            }
+
+            if (model.seconds != null)
+            {
+                exploded.AddRange(new int[] { model.seconds.first, model.seconds.second });
+            }
+
+            return exploded;
+        }
+
         public List<Hour24Model> GetAllPossibleHours(List<int> digits)
         {
             var correctHour = new List<int>();
 
-            var hours = GetAllHours(digits).Select(gh => new Hour24Model { hour = gh }).ToList();
+            var hours = FillAllHours(digits).Select(gh => new Hour24Model { hour = gh });
 
-            var allHours = new List<Hour24Model>();
+            var allHours = FillAllHourPartials(digits, hours, (m, v) => m.minutes = v);
 
-            foreach (var hour in hours)
-            {
-                var allPossibleMinutes = _generator.GenerateUniqueNumbersExcluding(digits, new List<int> { hour.hour.first, hour.hour.second })
-                    .Select(n => {
-                        int firstDigit = n / 10;
-                        int secondDigit = n - firstDigit * 10;
+            var fullHours = FillAllHourPartials(digits, allHours, (m, v) => m.seconds = v);
 
-                        return new TimeNoModel { first = firstDigit, second = secondDigit };
-                    })
-                    .Where(v => validateMinSec(v))
-                    .ToList();
-
-                allPossibleMinutes.ForEach(min =>
-                {
-                    var copy = hour.Copy();
-                    copy.minutes = min;
-                    allHours.Add(copy);
-                });
-            }
-
-            var fullHours = new List<Hour24Model>();
-
-            foreach (var hour in allHours)
-            {
-                var allPossibleMinutes = _generator.GenerateUniqueNumbersExcluding(digits, new List<int> { hour.hour.first, hour.hour.second, hour.minutes.first, hour.minutes.second, })
-                    .Select(n => {
-                        int firstDigit = n / 10;
-                        int secondDigit = n - firstDigit * 10;
-
-                        return new TimeNoModel { first = firstDigit, second = secondDigit };
-                    })
-                    .Where(v => validateMinSec(v))
-                    .ToList();
-
-                allPossibleMinutes.ForEach(sec =>
-                {
-                    var copy = hour.Copy();
-                    copy.seconds = sec;
-                    fullHours.Add(copy);
-                });
-            }
-
-            return fullHours;
+            return fullHours.ToList();
         }
 
         public string solution(int A, int B, int C, int D, int E, int F)
