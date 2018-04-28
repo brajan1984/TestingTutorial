@@ -25,32 +25,40 @@ namespace TestingWorkshop
 
         public IEnumerable<TimeNoModel> GetAllHours(List<int> digits)
         {
-            return GenerateNumbers(digits).Where(h => validateHour(h));
+            return GenerateNumbers(digits).Where(h => validateHour(h)).ToList();
         }
 
-        private Dictionary<List<TimeNoModel>, List<TimeNoModel>> GetUniqueCombinations(List<int> allDigits, List<List<TimeNoModel>> allCurrentCombinations)
+        public List<TimeNoModel> GetUniqueCombinations(List<int> allDigits, List<TimeNoModel> allCurrentCombinations)
         {
-            var result = new Dictionary<List<TimeNoModel>, List<TimeNoModel>>();
-            
+            var excludedDigits = new List<int>();
+
             foreach (var usedCombination in allCurrentCombinations)
             {
-                var possibleDigits = allDigits.ToList();
-
-                foreach (var numberInCombination in usedCombination)
-                {
-                    possibleDigits.Remove(numberInCombination.first);
-                    possibleDigits.Remove(numberInCombination.second);
-
-                    var combinations = GenerateNumbers(possibleDigits);
-                }
+                excludedDigits.Add(usedCombination.first);
+                excludedDigits.Add(usedCombination.second);
             }
 
-            return result;
+            var combinations = GenerateNumbersExcept(allDigits, excludedDigits);
+
+            return combinations;
         }
 
-        public List<TimeNoModel> GenerateNumbers(List<int> digits)
+        public List<TimeNoModel> GenerateNumbersExcept(IEnumerable<int> digits, IEnumerable<int> except)
         {
-            if (digits.Count <= 1)
+            var digitsFiltered = digits.ToList();
+
+            except.ToList().ForEach(toRemove =>
+            {
+                digitsFiltered = digitsFiltered.GroupBy(s => s)
+                    .SelectMany(g => g.Key.Equals(toRemove) ? g.Skip(1) : g).ToList();
+            });
+
+            return GenerateNumbers(digitsFiltered);
+        }
+
+        public List<TimeNoModel> GenerateNumbers(IEnumerable<int> digits)
+        {
+            if (digits.Count() <= 1)
             {
                 throw new ArgumentException("There should be two or more digits");
             }
@@ -76,124 +84,45 @@ namespace TestingWorkshop
             return result;
         }
 
-        /*private void GenerateHourPartials(List<int> digits, List<List<TimeNoModel>> allExcludedCombinations, Func<TimeNoModel, bool> validator)
-        {
-            foreach (var combination in allExcludedCombinations)
-            {
-                var testDigits = digits.ToList();
-                testDigits.Remove(hour.hour.first);
-                testDigits.Remove(hour.hour.second);
-                testDigits.Remove(hour.minutes.first);
-                testDigits.Remove(hour.minutes.second);
-
-                for (int first = 0; first < testDigits.Count(); first++)
-                {
-                    var digitsForNext = testDigits.ToList();
-
-                    int firstNo = digitsForNext[first];
-                    digitsForNext.Remove(firstNo);
-
-                    foreach (var secondNo in digitsForNext)
-                    {
-
-                        var seconds = new TimeNoModel() { first = firstNo, second = secondNo };
-
-                        if (validateMinSec(seconds))
-                        {
-
-                            var hourcpy = new Hour24Model
-                            {
-                                hour = hour.hour,
-                                minutes = hour.minutes,
-                                seconds = hour.seconds
-                            };
-                            hourcpy.seconds = seconds;
-                            correctHours.Add(hourcpy);
-                        }
-                    }
-                }
-            }
-        }*/
-
         public List<Hour24Model> GetAllPossibleHours(List<int> digits)
         {
             var correctHour = new List<int>();
 
-            var hours = GetAllHours(digits).Select(gh => new Hour24Model { hour = gh });
+            var hours = GetAllHours(digits).Select(gh => new Hour24Model { hour = gh }).ToList();
 
-            var hoursWithMinutes = new List<Hour24Model>();
+            var allHours = new List<Hour24Model>();
 
             foreach (var hour in hours)
             {
-                var testDigits = digits.ToList();
-                testDigits.Remove(hour.hour.first);
-                testDigits.Remove(hour.hour.second);
+                var allPossibleMinutes = GetUniqueCombinations(digits, new List<TimeNoModel> { hour.hour })
+                    .Where(v => validateMinSec(v))
+                    .ToList();
 
-                for (int first = 0; first < testDigits.Count(); first++)
+                allPossibleMinutes.ForEach(min =>
                 {
-                    var digitsForNext = testDigits.ToList();
-
-                    int firstNo = digitsForNext[first];
-                    digitsForNext.Remove(firstNo);
-
-                    foreach (var secondNo in digitsForNext)
-                    {
-
-                        var minute = new TimeNoModel() { first = firstNo, second = secondNo };
-                        var hourcpy = new Hour24Model
-                        {
-                            hour = hour.hour,
-                            minutes = hour.minutes,
-                            seconds = hour.seconds
-                        };
-                        if (validateMinSec(minute))
-                        {
-                            hourcpy.minutes = minute;
-                            hoursWithMinutes.Add(hourcpy);
-                        }
-                    }
-                }
+                    var copy = hour.Copy();
+                    copy.minutes = min;
+                    allHours.Add(copy);
+                });
             }
 
-            var correctHours = new List<Hour24Model>();
+            var fullHours = new List<Hour24Model>();
 
-            foreach (var hour in hoursWithMinutes)
+            foreach (var hour in allHours)
             {
-                var testDigits = digits.ToList();
-                testDigits.Remove(hour.hour.first);
-                testDigits.Remove(hour.hour.second);
-                testDigits.Remove(hour.minutes.first);
-                testDigits.Remove(hour.minutes.second);
+                var allPossibleMinutes = GetUniqueCombinations(digits, new List<TimeNoModel> { hour.hour, hour.minutes })
+                    .Where(v => validateMinSec(v))
+                    .ToList();
 
-                for (int first = 0; first < testDigits.Count(); first++)
+                allPossibleMinutes.ForEach(sec =>
                 {
-                    var digitsForNext = testDigits.ToList();
-
-                    int firstNo = digitsForNext[first];
-                    digitsForNext.Remove(firstNo);
-
-                    foreach (var secondNo in digitsForNext)
-                    {
-
-                        var seconds = new TimeNoModel() { first = firstNo, second = secondNo };
-
-                        if (validateMinSec(seconds))
-                        {
-
-                            var hourcpy = new Hour24Model
-                            {
-                                hour = hour.hour,
-                                minutes = hour.minutes,
-                                seconds = hour.seconds
-                            };
-                            hourcpy.seconds = seconds;
-                            correctHours.Add(hourcpy);
-                        }
-                    }
-                }
+                    var copy = hour.Copy();
+                    copy.seconds = sec;
+                    fullHours.Add(copy);
+                });
             }
 
-            return correctHours;
+            return fullHours;
         }
 
         public string solution(int A, int B, int C, int D, int E, int F)

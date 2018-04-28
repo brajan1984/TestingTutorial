@@ -83,21 +83,40 @@ namespace xTestingWorkshopTests
         }
 
         [Theory]
-        [InlineData(new int[] { 1, 8, 3, 2, 6, 4 }, new int[] { 1, 8, 1, 3, 1, 2, 1, 6, 1, 4, 2, 1, 2, 3 })]
+        [InlineData(new int[] { 1, 8, 3, 2, 6, 4 }, new int[] { 18, 13, 12, 16, 14, 21, 23, 24 })]
         public void GetAllHours_HoursAreFilteredByProperRange_CorrectHoursCollection(int[] inputData, int[] expectedResultData)
         {
             var hours = _solutionImpl.GetAllHours(inputData.ToList());
 
             var expectedResult = new List<TimeNoModel>();
 
-            for (int i = 0; i < expectedResultData.Length; i=i+2)
+            for (int i = 0; i < expectedResultData.Length; i++)
             {
-                expectedResult.Add(new TimeNoModel { first = expectedResultData[i], second = expectedResultData[i + 1] });
+                var first = expectedResultData[i] / 10;
+                expectedResult.Add(new TimeNoModel { first = first, second = expectedResultData[i] - first * 10 });
             }
 
             var testResult = _solutionImpl.GetAllHours(inputData.ToList());
 
-            testResult.Should().BeEquivalentTo(testResult);
+            testResult.Should().BeEquivalentTo(expectedResult);
+        }
+
+        [Theory]
+        [InlineData(new int[] { 1, 8, 3, 2, 6, 4 }, new int[] { 2, 6 }, new int[] { 18, 13, 14, 81, 83, 84, 31, 38, 34, 41, 48, 43 })]
+        [InlineData(new int[] { 1, 1, 2 }, new int[] { 1 }, new int[] { 12, 21 })]
+        public void GenerateNumbersExcept_FilterCollection_CorrectFilteredCollection(int[] inputData, int[] excludeData, int[] expectedResultData)
+        {
+            var testResult = _solutionImpl.GenerateNumbersExcept(inputData.ToList(), excludeData.ToList());
+
+            var expectedResult = new List<TimeNoModel>();
+
+            for (int i = 0; i < expectedResultData.Length; i++)
+            {
+                var first = expectedResultData[i] / 10;
+                expectedResult.Add(new TimeNoModel { first = first, second = expectedResultData[i] - first * 10 });
+            }
+
+            testResult.Should().BeEquivalentTo(expectedResult.ToList());
         }
     }
 }

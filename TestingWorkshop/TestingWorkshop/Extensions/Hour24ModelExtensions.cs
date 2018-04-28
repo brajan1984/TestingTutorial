@@ -18,5 +18,15 @@ namespace TestingWorkshop.Extensions
         {
             return "new string[] {" + correctHours.Select(h => "\"" + h.To24HourFormatString() + "\"").Aggregate((c, n) => $"{c}, {n}") + "}";
         }
+
+        public static Hour24Model Copy(this Hour24Model toCopy)
+        {
+            return new Hour24Model
+            {
+                hour = toCopy.hour,
+                minutes = toCopy.minutes,
+                seconds = toCopy.seconds
+            };
+        }
     }
 }
