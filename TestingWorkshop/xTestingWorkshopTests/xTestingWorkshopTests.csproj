@@ -85,8 +85,10 @@
     <Compile Include="ExplorationTests.cs" />
     <Compile Include="Extensions\TimeNoModelExtensionsTests.cs" />
     <Compile Include="Extensions\Hour24ModelExtensionsTests.cs" />
-    <Compile Include="HourGeneratorTests.cs" />
+    <Compile Include="FullHoursGeneratorTests.cs" />
+    <Compile Include="HourPartialsGeneratorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SolutionTests.cs" />
     <Compile Include="TwoDigitsNumberGeneratorTests.cs" />
   </ItemGroup>
   <ItemGroup>

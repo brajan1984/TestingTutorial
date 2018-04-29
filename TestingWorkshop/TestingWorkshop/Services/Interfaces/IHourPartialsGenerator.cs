@@ -7,7 +7,7 @@ using TestingWorkshop.Models;
 
 namespace TestingWorkshop.Services
 {
-    public interface IHourGenerator
+    public interface IHourPartialsGenerator
     {
         IEnumerable<Hour24Model> FillAllHours(IEnumerable<int> digits);
         IEnumerable<Hour24Model> FillAllMinutes(IEnumerable<int> digits, IEnumerable<Hour24Model> modelsWithHour);

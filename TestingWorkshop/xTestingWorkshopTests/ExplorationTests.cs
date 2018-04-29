@@ -14,7 +14,7 @@ namespace xTestingWorkshopTests
     public class ExplorationTests
     {
         Mock<IHoursProcessor> _processorMock = new Mock<IHoursProcessor>();
-        Mock<IHourGenerator> _hourGenerator = new Mock<IHourGenerator>();
+        Mock<IFullHoursGenerator> _hourGenerator = new Mock<IFullHoursGenerator>();
 
         Solution _solutionImpl = null;
         static readonly string[] _testSet1 = new string[] { "18:32:46", "18:36:24", "18:36:42", "18:34:26", "18:23:46", "18:26:34", "18:26:43", "18:24:36", "18:43:26", "18:42:36", "18:46:32", "18:46:23", "13:28:46", "13:26:48", "13:48:26", "13:46:28", "12:38:46", "12:36:48", "12:48:36", "12:46:38", "16:38:24", "16:38:42", "16:32:48", "16:34:28", "16:28:34", "16:28:43", "16:23:48", "16:24:38", "16:48:32", "16:48:23", "16:43:28", "16:42:38", "14:38:26", "14:36:28", "14:28:36", "14:26:38", "21:38:46", "21:36:48", "21:48:36", "21:46:38", "23:18:46", "23:16:48", "23:48:16", "23:46:18", "24:18:36", "24:16:38", "24:38:16", "24:36:18" };
@@ -33,7 +33,7 @@ namespace xTestingWorkshopTests
         [InlineData(1, 8, 0, 2, 0, 4, "00:12:48")]
         public void SolutionExplorationTest(int A, int B, int C, int D, int E, int F, string expectedValue)
         {
-            var result = _solutionImpl.solution(A, B, C, D, E, F);
+            var result = _solutionImpl.Execute(A, B, C, D, E, F);
 
             result.Should().Be(expectedValue);
         }
@@ -49,43 +49,15 @@ namespace xTestingWorkshopTests
         public void GetAllPossibleHours_GetsAStandardSet_ReturnsAllPossibleHours(int[] digits, string[] allCombinations)
         {
             var generator = new TwoDigitsUniqueNumberGenerator();
-            var numberGenerator = new HourGenerator(generator);
-            _solutionImpl = new Solution(_processorMock.Object, numberGenerator);
+            var numberGenerator = new HourPartialsGenerator(generator);
+            var fullHourGenerator = new FullHoursGenerator(numberGenerator);
+            //_solutionImpl = new Solution(_processorMock.Object, fullHourGenerator);
 
-            var result = _solutionImpl.GetAllPossibleHours(digits.ToList());
+            var result = fullHourGenerator.GetAllPossibleHours(digits.ToList());
 
             result.Select(h => h.To24HourFormatString())
                 .Should()
                 .BeEquivalentTo(allCombinations.ToList());
-        }
-
-        [Fact]
-        public void GetAllPossibleHours_CallWithData_AllNecessaryMethodsCalled()
-        {
-            //Arrange
-            var hourGenerator = new Mock<IHourGenerator>();
-            _solutionImpl = new Solution(_processorMock.Object, hourGenerator.Object);
-
-            var allDigits = new List<int>();
-            var hours = new List<Hour24Model>();
-            var hoursWMinutes = new List<Hour24Model>();
-            var fullHours = new List<Hour24Model>();
-
-            var myDigits = new List<int>();
-
-            hourGenerator.Setup(h => h.FillAllHours(allDigits)).Returns(hours);
-            hourGenerator.Setup(h => h.FillAllMinutes(allDigits, hours)).Returns(hoursWMinutes);
-            hourGenerator.Setup(h => h.FillAllSeconds(allDigits, hoursWMinutes)).Returns(hoursWMinutes);
-            
-            //Act
-            var result = _solutionImpl.GetAllPossibleHours(allDigits);
-
-            //Assert
-            hourGenerator.Verify(h => h.FillAllHours(It.Is<List<int>>(o => o == allDigits)), Times.Once);
-            hourGenerator.Verify(h => h.FillAllMinutes(It.Is<List<int>>(o => o == allDigits), It.Is<List<Hour24Model>>(o => o == hours)), Times.Once);
-            hourGenerator.Verify(h => h.FillAllSeconds(It.Is<List<int>>(o => o == allDigits), It.Is<List<Hour24Model>>(o => o == hoursWMinutes)), Times.Once);
-
-            result.Should().Equal(fullHours);
         }
     }
 }

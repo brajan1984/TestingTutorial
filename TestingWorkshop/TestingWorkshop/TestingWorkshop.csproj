@@ -53,11 +53,14 @@
     <Compile Include="Models\TimeNoModel.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\HourGenerator.cs" />
+    <Compile Include="Services\FullHoursGenerator.cs" />
+    <Compile Include="Services\HourPartialsGenerator.cs" />
     <Compile Include="Services\HourProcessor.cs" />
-    <Compile Include="Services\IHourGenerator.cs" />
-    <Compile Include="Services\IHoursProcessor.cs" />
-    <Compile Include="Services\IUniqueNumberGenerator.cs" />
+    <Compile Include="Services\Interfaces\IFullHoursGenerator.cs" />
+    <Compile Include="Services\Interfaces\IHourPartialsGenerator.cs" />
+    <Compile Include="Services\Interfaces\IHoursProcessor.cs" />
+    <Compile Include="Services\Interfaces\IUniqueNumberGenerator.cs" />
+    <Compile Include="Services\Solution.cs" />
     <Compile Include="Services\TwoDigitsUniqueNumberGenerator.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -8,11 +8,11 @@ using TestingWorkshop.Models;
 
 namespace TestingWorkshop.Services
 {
-    public class HourGenerator : IHourGenerator
+    public class HourPartialsGenerator : IHourPartialsGenerator
     {
         private readonly IUniqueNumberGenerator _generator;
 
-        public HourGenerator(IUniqueNumberGenerator generator)
+        public HourPartialsGenerator(IUniqueNumberGenerator generator)
         {
             _generator = generator;
         }
