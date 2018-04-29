@@ -17,7 +17,7 @@ namespace TestingWorkshop.Services
             _generator = generator;
         }
 
-        public IEnumerable<Hour24Model> FillAllHours(List<int> digits)
+        public IEnumerable<Hour24Model> FillAllHours(IEnumerable<int> digits)
         {
             return _generator.GenerateUniqueNumbers(digits)
                 .Select(n => {
@@ -26,17 +26,17 @@ namespace TestingWorkshop.Services
 
                     return new TimeNoModel { first = firstDigit, second = secondDigit };
                 })
-                .Where(h => validateHour(h))
+                .Where(h => ValidateHour(h))
                 .Select(gh => new Hour24Model { hour = gh })
                 .ToList();
         }
 
-        static bool validateHour(TimeNoModel hour)
+        public IEnumerable<Hour24Model> FillAllMinutes(IEnumerable<int> digits, IEnumerable<Hour24Model> modelsWithHour)
         {
-            return hour.fullNo >= 0 && hour.fullNo <= 24;
+            return FillAllHourPartials(digits, modelsWithHour, (m, v) => m.minutes = v);
         }
 
-        public IEnumerable<Hour24Model> FillAllHourPartials(IEnumerable<int> digits, IEnumerable<Hour24Model> modelsWithHour, Action<Hour24Model, TimeNoModel> modelModificator)
+        private IEnumerable<Hour24Model> FillAllHourPartials(IEnumerable<int> digits, IEnumerable<Hour24Model> modelsWithHour, Action<Hour24Model, TimeNoModel> modelModificator)
         {
             var allFilledModels = new List<Hour24Model>();
 
@@ -49,7 +49,7 @@ namespace TestingWorkshop.Services
 
                         return new TimeNoModel { first = firstDigit, second = secondDigit };
                     })
-                    .Where(v => validateMinSec(v))
+                    .Where(v => ValidateMinSec(v))
                     .ToList();
 
                 allPossibleValues.ForEach(model =>
@@ -62,8 +62,18 @@ namespace TestingWorkshop.Services
 
             return allFilledModels;
         }
-        
-        static bool validateMinSec(TimeNoModel hour)
+
+        public IEnumerable<Hour24Model> FillAllSeconds(IEnumerable<int> digits, IEnumerable<Hour24Model> modelsWitHourAndSeconds)
+        {
+            return FillAllHourPartials(digits, modelsWitHourAndSeconds, (m, v) => m.seconds = v);
+        }
+
+        private static bool ValidateHour(TimeNoModel hour)
+        {
+            return hour.fullNo >= 0 && hour.fullNo <= 24;
+        }
+
+        private static bool ValidateMinSec(TimeNoModel hour)
         {
             return hour.fullNo >= 0 && hour.fullNo <= 60;
         }
@@ -89,6 +99,5 @@ namespace TestingWorkshop.Services
 
             return exploded;
         }
-
     }
 }

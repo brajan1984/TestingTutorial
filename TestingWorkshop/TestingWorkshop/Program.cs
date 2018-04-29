@@ -54,9 +54,9 @@ namespace TestingWorkshop
 
             var hours = _generator.FillAllHours(digits);
 
-            var allHours = _generator.FillAllHourPartials(digits, hours, (m, v) => m.minutes = v);
+            var allHours = _generator.FillAllMinutes(digits, hours);
 
-            var fullHours = _generator.FillAllHourPartials(digits, allHours, (m, v) => m.seconds = v);
+            var fullHours = _generator.FillAllSeconds(digits, allHours);
 
             return fullHours.ToList();
         }

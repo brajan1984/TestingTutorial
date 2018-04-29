@@ -62,39 +62,30 @@ namespace xTestingWorkshopTests
         [Fact]
         public void GetAllPossibleHours_CallWithData_AllNecessaryMethodsCalled()
         {
+            //Arrange
             var hourGenerator = new Mock<IHourGenerator>();
             _solutionImpl = new Solution(_processorMock.Object, hourGenerator.Object);
 
             var allDigits = new List<int>();
-            var hours = new List<Hour24Model>() { new Hour24Model() };
+            var hours = new List<Hour24Model>();
             var hoursWMinutes = new List<Hour24Model>();
             var fullHours = new List<Hour24Model>();
-            Action<Hour24Model, TimeNoModel> action = (m, t) => { };
+
+            var myDigits = new List<int>();
 
             hourGenerator.Setup(h => h.FillAllHours(allDigits)).Returns(hours);
-            hourGenerator.Setup(h => h.FillAllHourPartials(
-                It.Is<List<int>>(o => o == allDigits), 
-                It.Is<List<Hour24Model>>(o => o == hours), 
-                It.IsAny<Action<Hour24Model, TimeNoModel>>()))
-                .Returns(hoursWMinutes)
-                .Verifiable();
-
-            hourGenerator.Setup(h => h.FillAllHourPartials(
-                It.Is<List<int>>(o => o == allDigits), 
-                It.Is<List<Hour24Model>>(o => o == hoursWMinutes), 
-                It.IsAny<Action<Hour24Model, TimeNoModel>>()))
-                .Returns(hoursWMinutes)
-                .Verifiable();
-
+            hourGenerator.Setup(h => h.FillAllMinutes(allDigits, hours)).Returns(hoursWMinutes);
+            hourGenerator.Setup(h => h.FillAllSeconds(allDigits, hoursWMinutes)).Returns(hoursWMinutes);
+            
+            //Act
             var result = _solutionImpl.GetAllPossibleHours(allDigits);
 
+            //Assert
             hourGenerator.Verify(h => h.FillAllHours(It.Is<List<int>>(o => o == allDigits)), Times.Once);
-            hourGenerator.Verify(h => h.FillAllHourPartials(It.Is<List<int>>(o => o == allDigits), It.Is<List<Hour24Model>>(o => o == hours), It.IsAny<Action<Hour24Model, TimeNoModel>>()), Times.Once);
-            hourGenerator.Verify(h => h.FillAllHourPartials(It.Is<List<int>>(o => o == allDigits), It.Is<List<Hour24Model>>(o => o == hoursWMinutes), It.IsAny<Action<Hour24Model, TimeNoModel>>()), Times.Once);
+            hourGenerator.Verify(h => h.FillAllMinutes(It.Is<List<int>>(o => o == allDigits), It.Is<List<Hour24Model>>(o => o == hours)), Times.Once);
+            hourGenerator.Verify(h => h.FillAllSeconds(It.Is<List<int>>(o => o == allDigits), It.Is<List<Hour24Model>>(o => o == hoursWMinutes)), Times.Once);
 
-            result
-                .Should()
-                .Equal(fullHours);
+            result.Should().Equal(fullHours);
         }
     }
 }
